@@ -19,7 +19,7 @@
 数值计算  
 ![avatar](images/数学问题1.jpg)  
 所有的计算表达式都可以由一颗二叉树表示，即每个运算符作为根节点，数值作为两个子节点。(token1 a op b token2)通过观察token1和token2来决定a和b是否能够进行运算。规则：
-* op $\in$ { $+$, $-$} 且 token1 $\in$ {(, empty}, token2 $\notin$ {$\times$, $\div$}
+* op $\in$ { $+$, $-$} 且 token1 $\in$ {(, empty}, token2 $\notin$ { $\times$, $\div$}
 * op $\in$ { $\times$, $\div$} 且 token1 $\notin$ { $\times$, $\div$}  
  
 通过每次化简一个操作符的方式来最终得到计算结果
