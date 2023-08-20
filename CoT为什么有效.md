@@ -18,7 +18,8 @@
 ### 数学问题
 数值计算  
 ![avatar](images/数学问题1.jpg)  
-所有的计算表达式都可以由一颗二叉树表示，即每个运算符作为根节点，数值作为两个子节点。(token1 a op b token2)通过观察token1和token2来决定a和b是否能够进行运算。规则：
+所有的计算表达式都可以由一颗二叉树表示，即每个运算符作为根节点，数值作为两个子节点,(token1 a op b token2)通过观察token1和token2来决定a和b是否能够进行运算。因此树高为 $logn$。  
+规则：
 * op $\in$ { $+$, $-$} 且 token1 $\in$ {(, empty}, token2 $\notin$ { $\times$, $\div$}
 * op $\in$ { $\times$, $\div$} 且 token1 $\notin$ { $\times$, $\div$}  
  
@@ -27,3 +28,30 @@
 解线性方程组  
 ![avatar](images/数学问题2.jpg)  
 利用高斯消元法解线性方程组，即每次将一个变量用其他变量表示，而后将该变量带入其他表达式中。
+## 为什么Transformer不能解决数值计算和解线性方程的问题
+有限深度、对数精度的Transformer模型的计算复杂类型是 $TC^0$（来源于The parallelism tradeoff: Limitations of log-precision
+transformers），而数值计算问题的复杂度是 $NC^1$的，因此低计算复杂度的模型无法直接解决高计算复杂度的问题。
+## 证明
+Transformer的计算复杂类型已经在The parallelism tradeoff: Limitations of log-precision transformers证明过了，现在只需要证明数值计算问题是 $NC^1$的复杂度即可。  
+布尔公式求值是典型的 $NC^1$完全问题，因此只需要将布尔公式求值问题化简为数值计算问题，即可证明数值计算的复杂度在  $NC^1$之上。那么属于 $TC^0$复杂度的计算模型有限深度、对数精度的Transformer就无法解决这个问题。
+> 证明过程：布尔公式求值问题的定义，所有字符来自于字符表 $\{0,1, \vee, \wedge, \neg, ), (, \}$，布尔公式由如下规则产生:
+>  * 0 和 1 本身可以作为布尔公式
+>  * 如果 $\varphi$是布尔公式那么，$\neg\varphi$也是布尔公式
+>  * 如果 $\varphi_1, \varphi_2$是布尔公式那么， $\varphi_1 \vee \varphi_2$ 和 $\varphi_1 \wedge \varphi_2$也是布尔公式
+> 
+> 将布尔公式求值问题规约为计算问题:
+> * $f(0)=0$ 且， $f(1)=1$
+> * 对于所有布尔表达式 $\varphi$， $f(\neg\varphi)=(1-\varphi)$
+> * 对于所有布尔表达式 $\varphi_1, \varphi_2$， $f(\varphi_1 \wedge  \varphi_2)=f(\varphi_1) \times f(\varphi_2)$
+> * 对于所有布尔表达式 $\varphi_1, \varphi_2$， $f(\varphi_1 \vee \varphi_2)=(1 -  (1 - f(\varphi_1)) \times f(1 - f(\varphi_2)))$ 
+>
+> 例子：  
+> &emsp; 假设有如下表达式: $(1 \vee \neg0) \wedge (1 \wedge \neg1)$将其转换为数值表达式
+> 1. $f(1 \vee \neg0) \times f(1 \wedge \neg1)$
+> 2. $[1 - (1 - f(1)) \times (1 - f(\neg0))] \times [f(1) \times f(\neg1)]$
+> 3. $f(1) \times f(0) \times (1 \times 0)$
+> 4. $=1 \times 0 \times 1 \times 0 = 0$
+ 
+## 为什么CoT有效
+CoT的方式提高了Transformer模型的计算复杂度，将本身有限深度、对数精度的Transformer模型从 $TC^0$的复杂度变成，$NC^1$的复杂度。简要说明：  
+一次生成的方式，Transformer的深度为一个常数d， 可以表达为 $O(1=log^0n)$，那么其扇入为 $O(poly(n))$，$W_Q \in \mathbb{R}^{d_{emb} \times d_{qk}}$，$W_K \in \mathbb{R}^{d_{emb} \times d_{qk}}$，$W_V \in \mathbb{R}^{d_{emb} \times d_{v}}$，$X \in \mathbb{R}^{n \times d_{emb}}$，$(XW_Q)(XW_K)^TXW_V = (QK^T)V \in \mathbb{R}^{n \times d_v}$，即当前Transformer的复杂度为 $TC^0$。CoT通过改变模型解决问题的过程，隐含的改变了有效深度，因为分为几步解决完全由模型决定，每一步都可以视为模型对数值计算问题的子问题进行了计算，因此可以看做进行了 $logn$次子计算（分解成了二叉树，树高为 $logn$。[见数学问题](#数学问题)），宏观上Transformer就变成了一个深度为 $logn$，扇入为$O(poly(n))$的计算模型，其计算复杂度变成了 $NC^1$，因此能够解决复杂度为 $NC^1$的数值计算问题。
