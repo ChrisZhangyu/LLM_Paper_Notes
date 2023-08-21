@@ -17,7 +17,7 @@
 完全性是指在某一复杂度类别中的其他问题都能在多项式时间内$O(poly(n))$化简成该完全问题，也即该问题一定程度上代表了该复杂度类别的特性，例如经典的NP完全问题：给定一个有限数量的整数集合，找出任何一个此集合的非空子集且此子集内整数和为零。，即代表了NP复杂度下问题的特性。  
 ### 数学问题
 数值计算  
-![avatar](images/数学问题1.jpg)  
+![avatar](images/math1.jpg)  
 所有的计算表达式都可以由一颗二叉树表示，即每个运算符作为根节点，数值作为两个子节点,(token1 a op b token2)通过观察token1和token2来决定a和b是否能够进行运算。因此树高为 $logn$。  
 规则：
 * op $\in$ { $+$, $-$} 且 token1 $\in$ {(, empty}, token2 $\notin$ { $\times$, $\div$}
@@ -26,7 +26,7 @@
 通过每次化简一个操作符的方式来最终得到计算结果
 
 解线性方程组  
-![avatar](images/数学问题2.jpg)  
+![avatar](images/math2.jpg)  
 利用高斯消元法解线性方程组，即每次将一个变量用其他变量表示，而后将该变量带入其他表达式中。
 ## 为什么Transformer不能解决数值计算和解线性方程的问题
 有限深度、对数精度的Transformer模型的计算复杂类型是 $TC^0$（来源于The parallelism tradeoff: Limitations of log-precision
